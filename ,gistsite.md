@@ -21,7 +21,7 @@ python3 -B gistsite.py -o docs       # render catalog -> docs/
 
 **Sections:** [NAME](#name) | [SYNOPSIS](#synopsis) | [OPTIONS](#options) | [DETECT](#detect) | [OUTPUT](#output) | [TESTS](#tests) | [SEE ALSO](#see-also) | [LICENSE](#license) | [AUTHOR](#author)
 
-**Files:** [gistsite.py](#file-gistsite-py) | [Makefile](#file-makefile) | [pyproject.toml](#file-pyproject-toml)
+**Files:** [gistsite.py](http://tiny.cc/gistsite#file-gistsite-py) | [Makefile](http://tiny.cc/gistsite#file-makefile) | [pyproject.toml](http://tiny.cc/gistsite#file-pyproject-toml)
 
 ## NAME
 
