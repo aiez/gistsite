@@ -17,8 +17,6 @@ python3 -B gistsite.py --checks      # self-tests (no network)
 python3 -B gistsite.py -o docs       # render catalog -> docs/
 ```
 
-<a href="https://github.com/aiez/gistsite"><img width="150" align="right" alt="qr" src="https://tiny.cc/tiny/qr-image/tiny.cc~gistsite~l~150.png"></a>
-
 **Sections:** [NAME](#name) | [SYNOPSIS](#synopsis) | [OPTIONS](#options) | [DETECT](#detect) | [OUTPUT](#output) | [TESTS](#tests) | [SEE ALSO](#see-also) | [LICENSE](#license) | [AUTHOR](#author)
 
 **Files:** [gistsite.py](https://github.com/aiez/gistsite#file-gistsite-py) | [Makefile](https://github.com/aiez/gistsite#file-makefile) | [pyproject.toml](https://github.com/aiez/gistsite#file-pyproject-toml)
