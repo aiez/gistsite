@@ -16,6 +16,7 @@ nothing to the API; exclude stale gists by slug with --skip.
 
 Options:
  -u --user  github user                       user=timm
+ -g --org   github org (repos, not gists)      org=
  -o --out   output dir                         out=docs
  -c --css   stylesheet href for every page     css=https://timm.fyi/site.css
  -x --skip  comma list of slugs to exclude     skip=
@@ -24,9 +25,15 @@ eg: python3 gistsite.py --checks     # self-tests (no network)
     python3 gistsite.py -o docs      # render catalog -> docs/
     python3 gistsite.py --skip ape,ruler   # drop retired gists
 """
-import os, re, sys, json, subprocess
+import os, re, sys, json, ssl, subprocess
 from urllib.request import urlopen, Request
 from types import SimpleNamespace as o
+
+try:                                  # macOS framework python lacks CAs
+  import certifi
+  CTX = ssl.create_default_context(cafile=certifi.where())
+except Exception:
+  CTX = None
 
 HDRS = {"User-Agent": "gistsite",
         "Accept": "application/vnd.github+json"}
@@ -35,7 +42,7 @@ HOOK = re.compile(r"^,(.+)\.md$")   # a curated gist's README filename
 # ## github + render --------------------------------------------
 def get(url, raw=False):
   "Fetch a url with the API headers; json unless raw."
-  txt = urlopen(Request(url, headers=HDRS)).read().decode()
+  txt = urlopen(Request(url, headers=HDRS), context=CTX).read().decode()
   return txt if raw else json.loads(txt)
 
 def gists(user):
@@ -45,6 +52,22 @@ def gists(user):
                      f"/gists?per_page=100&page={page}"):
     out += batch; page += 1
   return out
+
+def repos(org):
+  "Every non-fork repo in an org, walking the paginated API."
+  out, page = [], 1
+  while batch := get(f"https://api.github.com/orgs/{org}"
+                     f"/repos?per_page=100&page={page}&sort=full_name"):
+    out += [r for r in batch if not r["fork"]]; page += 1
+  return out
+
+def curated_repo(repo):
+  "An org repo -> catalog record (README.md is the page body)."
+  full, br = repo["full_name"], repo["default_branch"]
+  return o(name=repo["name"], url=repo["html_url"],
+           raw=f"https://raw.githubusercontent.com/{full}/{br}/README.md",
+           desc=repo["description"] or repo["name"],
+           at=(repo["updated_at"] or "")[:10])
 
 def slug(s):
   "Filesafe page name: lowercase, runs of non-alphanumerics -> single -."
@@ -115,31 +138,50 @@ def wrap(title, body, the):
   return head + body + FOOT
 
 def roster(items, the):
-  "The index.html body: one table row per curated gist."
+  "The index.html body: one table row per catalog item."
+  who = the.org or the.user
   rows = "\n".join(
     f'<tr><td><a href="{g.name}.html">{esc(g.name)}</a></td>'
     f'<td>{esc(g.desc)}</td>'
     f'<td><a href="{g.url}">src</a></td><td>{g.at}</td></tr>'
     for g in items)
-  return (f"<h1>tools</h1>\n<p>{len(items)} curated gists by "
-          f'<a href="https://github.com/{the.user}">{the.user}</a>. each '
+  return (f"<h1>tools</h1>\n<p>{len(items)} tools by "
+          f'<a href="https://github.com/{who}">{who}</a>. each '
           "carries a one-file README, runs in three commands.</p>\n"
           "<table><tr><th>tool</th><th>what</th><th>src</th>"
           f"<th>updated</th></tr>\n{rows}\n</table>")
 
 # ## build ------------------------------------------------------
+def relinkrepo(html, rec):
+  "Point README's relative links at the repo's blob/raw tree."
+  base = rec.url + "/blob/HEAD/"
+  fix = lambda m: ('href="%s"' % m.group(1) if re.match(
+    r'(https?:|#|//|mailto:)', m.group(1))
+    else 'href="%s%s"' % (base, m.group(1)))
+  return re.sub(r'href="([^"]+)"', fix, html)
+
 def build(the):
   os.makedirs(the.out, exist_ok=True)
   skip = {s for s in getattr(the, "skip", "").split(",") if s}
   items = []
-  for gist in gists(the.user):
-    if (g := curated(gist)) and g.name not in skip:
+  if the.org:                         # source = org repos (README.md)
+    for repo in repos(the.org):
+      g = curated_repo(repo)
+      if g.name in skip: continue
+      try: md = get(g.raw, raw=True)
+      except Exception: continue      # repo has no README.md
       open(f"{the.out}/{g.name}.html", "w").write(
-        wrap(g.name, relink(pandoc(get(g.raw, raw=True)), gist), the))
+        wrap(g.name, relinkrepo(pandoc(md), g), the))
       items.append(g); print("ok", g.name)
+  else:                               # source = user gists (,name.md)
+    for gist in gists(the.user):
+      if (g := curated(gist)) and g.name not in skip:
+        open(f"{the.out}/{g.name}.html", "w").write(
+          wrap(g.name, relink(pandoc(get(g.raw, raw=True)), gist), the))
+        items.append(g); print("ok", g.name)
   items.sort(key=lambda g: g.name)
-  open(f"{the.out}/index.html", "w").write(wrap("gists", roster(items, the), the))
-  print(f"# {len(items)} gists -> {the.out}")
+  open(f"{the.out}/index.html","w").write(wrap("tools", roster(items,the),the))
+  print(f"# {len(items)} -> {the.out}")
 
 # ## checks (run via --checks; no network) ----------------------
 def test_curated():
@@ -182,6 +224,20 @@ def test_relink():
   assert 'href="RAW"' in relink('<a href="#file-auto93-csv">x</a>', g)
   assert 'href="U#file-gone-csv"' in relink('<a href="#file-gone-csv">x</a>', g)
 
+def test_curated_repo():
+  "An org repo becomes a record; raw points at README.md on its branch."
+  g = curated_repo({"name": "nuff", "full_name": "aiez/nuff",
+    "default_branch": "main", "html_url": "https://github.com/aiez/nuff",
+    "description": "d", "updated_at": "2026-06-26T00:00:00Z"})
+  assert g.name == "nuff" and g.at == "2026-06-26"
+  assert g.raw.endswith("aiez/nuff/main/README.md")
+
+def test_relinkrepo():
+  "Relative README links go to the repo blob; absolute ones stay."
+  rec = o(url="https://github.com/aiez/nuff")
+  h = relinkrepo('<a href="nuff.py">f</a> <a href="https://x">x</a>', rec)
+  assert 'github.com/aiez/nuff/blob/HEAD/nuff.py' in h and 'href="https://x"' in h
+
 # ## lib + cli --------------------------------------------------
 def settings(s):
   "Parse var=val pairs from a string into an o (val may be empty)."
@@ -190,6 +246,7 @@ def settings(s):
 def main(the, g):
   argv = sys.argv[1:]
   vals = {"-u": "user", "--user": "user", "-o": "out", "--out": "out",
+          "-g": "org", "--org": "org",
           "-c": "css", "--css": "css", "-x": "skip", "--skip": "skip"}
   i = 0
   while i < len(argv):
