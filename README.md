@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026 Tim Menzies, MIT License https://opensource.org/licenses/MIT -->
 <a href="https://timm.fyi"><img align="right" alt="Author" src="https://img.shields.io/badge/Author-timm-dc143c?logo=readme&logoColor=white"></a><img align="right" alt="Language" src="https://img.shields.io/badge/Language-Python%203.12+-000080?logo=python&logoColor=white"><img align="right" alt="Deps" src="https://img.shields.io/badge/Deps-pandoc-32cd32?logo=markdown&logoColor=white"><a href="https://choosealicense.com/licenses/mit/"><img align="right" alt="License" src="https://img.shields.io/badge/License-MIT-32cd32?logo=open-source-initiative&logoColor=white"></a><img align="right" alt="Purpose" src="https://img.shields.io/badge/Purpose-Static%20Catalog-7b68ee?logo=githubcopilot&logoColor=white"><br>
 
-### [http://tiny.cc/gistsite](http://tiny.cc/gistsite)
+### [https://github.com/aiez/gistsite](https://github.com/aiez/gistsite)
 gistsite: one short file that turns a GitHub user's gists into a
 static catalog. It keeps only the *curated* ones -- gists whose files
 include a `,<name>.md` README hook (the konfig convention) -- fetches
@@ -12,16 +12,16 @@ matches the rest of the site with no extra config.
 
 ```bash
 # install and test
-git clone http://tiny.cc/gistsite && cd gistsite
+git clone https://github.com/aiez/gistsite && cd gistsite
 python3 -B gistsite.py --checks      # self-tests (no network)
 python3 -B gistsite.py -o docs       # render catalog -> docs/
 ```
 
-<a href="http://tiny.cc/gistsite"><img width="150" align="right" alt="qr" src="https://tiny.cc/tiny/qr-image/tiny.cc~gistsite~l~150.png"></a>
+<a href="https://github.com/aiez/gistsite"><img width="150" align="right" alt="qr" src="https://tiny.cc/tiny/qr-image/tiny.cc~gistsite~l~150.png"></a>
 
 **Sections:** [NAME](#name) | [SYNOPSIS](#synopsis) | [OPTIONS](#options) | [DETECT](#detect) | [OUTPUT](#output) | [TESTS](#tests) | [SEE ALSO](#see-also) | [LICENSE](#license) | [AUTHOR](#author)
 
-**Files:** [gistsite.py](http://tiny.cc/gistsite#file-gistsite-py) | [Makefile](http://tiny.cc/gistsite#file-makefile) | [pyproject.toml](http://tiny.cc/gistsite#file-pyproject-toml)
+**Files:** [gistsite.py](https://github.com/aiez/gistsite#file-gistsite-py) | [Makefile](https://github.com/aiez/gistsite#file-makefile) | [pyproject.toml](https://github.com/aiez/gistsite#file-pyproject-toml)
 
 ## NAME
 
@@ -77,8 +77,8 @@ to its rendered page. Unauthenticated, the API allows 60 requests/hour
 
 ## SEE ALSO
 
-    konfig    http://tiny.cc/konfig   shared Makefile/boilerplate + styles
-    nuff      http://tiny.cc/nuff     tiny stdlib python tricks (a catalog entry)
+    konfig    https://github.com/aiez/konfig   shared Makefile/boilerplate + styles
+    nuff      https://github.com/aiez/nuff     tiny stdlib python tricks (a catalog entry)
     xomo      http://tiny.cc/xomo     cocomo-ii + coqualmo    (a catalog entry)
     live      https://timm.fyi/gists/ the rendered catalog
 

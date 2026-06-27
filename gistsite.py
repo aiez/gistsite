@@ -107,7 +107,7 @@ HEAD = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <hr>
 """
 FOOT = ('\n<hr>\n<p class="foot"><span>built by '
-        '<a href="http://tiny.cc/gistsite">gistsite</a></span></p>\n'
+        '<a href="https://github.com/aiez/gistsite">gistsite</a></span></p>\n'
         '</main></body></html>\n')
 
 def wrap(title, body, the):

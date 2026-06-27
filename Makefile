@@ -11,7 +11,7 @@ TOOLS  := python3:run pandoc:render ruff:lint
 PKG    := python3 pandoc gawk ruff neovim tmux
 
 $(KONFIG)/Makefile:
-	@test -f $@ || { echo "missing konfig: git clone http://tiny.cc/konfig $(KONFIG)"; exit 1; }
+	@test -f $@ || { echo "missing konfig: git clone https://github.com/aiez/konfig $(KONFIG)"; exit 1; }
 include $(KONFIG)/Makefile
 
 OUT ?= docs   # for: make demo OUT=dir
