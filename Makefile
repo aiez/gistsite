@@ -20,7 +20,9 @@ demo: ## render the catalog into $(OUT)/ (hits the github gists api)
 	@python3 -B gistsite.py -o $(OUT)
 
 CHECKS: ## test: self-checks pass (no network)
-	@python3 -B gistsite.py --checks | grep -q "8/8 ok" && echo "ok checks"
+	@python3 -B gistsite.py --checks | \
+	  gawk -F'[ /]' '$$2==$$3 && $$3>0 && $$4=="ok"{f=1} END{exit !f}' \
+	  && echo "ok checks"
 
 test: ## run every UPPERCASE rule
 	@gawk -F: '/^[A-Z][A-Z_]*:[^=]/ {print $$1}' $(MAKEFILE_LIST) | \
